@@ -1,0 +1,6 @@
+openai
+ollama
+icrawler
+python-pptx
+python-dotenv
+argparse
