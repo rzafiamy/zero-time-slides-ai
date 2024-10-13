@@ -1,5 +1,7 @@
 import openai
 import requests
+import json
+import os
 
 class AIRequester:
     def __init__(self, config):
@@ -10,10 +12,16 @@ class AIRequester:
         self.host = config['HOST']
         self.api_key = config['API_KEY']
         self.config = config
+        self.cache_file = os.path.join(config['OUTPUT_PATH'], 'cache.json')
 
         if self.provider == 'openai':
             openai.api_key = self.api_key
             openai.base_url = self.host
+
+        # Create the cache file if it doesn't exist
+        if not os.path.exists(self.cache_file):
+            with open(self.cache_file, 'w') as f:
+                json.dump({}, f)
 
     def create_prompt(self, topic, slide_length):
         """
@@ -60,7 +68,6 @@ class AIRequester:
 
         [SLIDEBREAK]
 
-
         Elaborate on the Content, provide as much information as possible.
         REMEMBER TO PLACE a [/CONTENT] at the end of the Content.
         Do not include any special characters (?, !, ., :, ) in the Title.
@@ -70,12 +77,21 @@ class AIRequester:
         """
         Get the response from the chosen AI model.
         """
+        cached_response = self._check_cache(message)
+        if cached_response:
+            return cached_response
+        
         if self.provider == 'openai':
-            return self._get_openai_response(message)
+            response = self._get_openai_response(message)
         elif self.provider == 'ollama':
-            return self._get_ollama_response(message)
+            response = self._get_ollama_response(message)
         else:
             raise ValueError("Unsupported provider")
+        
+        # Cache the response
+        self._update_cache(message, response)
+        
+        return response
 
     def _get_openai_response(self, message):
         """
@@ -96,3 +112,21 @@ class AIRequester:
         response = requests.post(f"{self.host}/api/completion", json=data, headers=headers)
         response_json = response.json()
         return response_json['response']
+
+    def _check_cache(self, message):
+        """
+        Check if the message exists in the cache and return the cached response if it does.
+        """
+        with open(self.cache_file, 'r') as f:
+            cache = json.load(f)
+        return cache.get(message)
+
+    def _update_cache(self, message, response):
+        """
+        Update the cache with the new request-response pair.
+        """
+        with open(self.cache_file, 'r') as f:
+            cache = json.load(f)
+        cache[message] = response
+        with open(self.cache_file, 'w') as f:
+            json.dump(cache, f, indent=4)

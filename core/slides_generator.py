@@ -1,6 +1,8 @@
 from pptx import Presentation
 from core.image_search import ImageSearcher
 from core.ai_requester import AIRequester
+from core.layout_manager import LayoutManager
+import os
 
 class SlidesGenerator:
     def __init__(self, config):
@@ -9,6 +11,7 @@ class SlidesGenerator:
         """
         self.config = config
         self.ai_requester = AIRequester(config)
+        self.layoutM = LayoutManager()
 
     def generate_presentation(self, topic, slide_length):
         """
@@ -38,54 +41,20 @@ class SlidesGenerator:
             image_query = self._extract_tag_content(slide, "[IMAGE]", "[/IMAGE]")  # For image slides
             
             if slide_type == "[L_TS]":  # Title Slide
-                self._create_title_slide(presentation, title, subtitle)
+                self.layoutM._create_title_slide(presentation, title, subtitle)
             elif slide_type == "[L_CS]":  # Content Slide
-                self._create_content_slide(presentation, title, text_content)
+                self.layoutM._create_title_and_content_slide(presentation, title, text_content)
             elif slide_type == "[L_IS]":  # Image Slide
-                self._create_image_slide(presentation, title, text_content, image_query)
-            elif slide_type == "[L_THS]":  # Thanks Slide
-                self._create_thanks_slide(presentation, title)
-
-    def _create_thanks_slide(self, presentation, title):
-        """
-        Create a thanks slide with the given title.
-        """
-        slide_layout = presentation.slide_layouts[5]
-        slide = presentation.slides.add_slide(slide_layout)
-        slide.shapes.title.text = title
-    
-    def _create_title_slide(self, presentation, title, subtitle):
-        """
-        Create a title slide with the given title and subtitle.
-        """
-        print(f"Creating title slide with title: {title} and subtitle: {subtitle}")
-        slide_layout = presentation.slide_layouts[0]
-        slide = presentation.slides.add_slide(slide_layout)
-        slide.shapes.title.text = title
-        slide.placeholders[1].text = subtitle
-
-    def _create_content_slide(self, presentation, title, content):
-        """
-        Create a content slide with the given title and content.
-        """
-        slide_layout = presentation.slide_layouts[1]
-        slide = presentation.slides.add_slide(slide_layout)
-        slide.shapes.title.text = title
-        slide.placeholders[1].text = content
-
-    def _create_image_slide(self, presentation, title, content, image_query):
-        """
-        Create an image slide with the given title, content, and image.
-        """
-        slide_layout = presentation.slide_layouts[8]
-        slide = presentation.slides.add_slide(slide_layout)
-        slide.shapes.title.text = title
-        slide.placeholders[1].text = content
+                image_searcher = ImageSearcher(self.config)
+                image_path = image_searcher.download_image(image_query)
         
-        image_searcher = ImageSearcher(self.config)
-        image_path = image_searcher.download_image(image_query)
-        slide.shapes.add_picture(f"{self.config['IMAGES_PATH']}/{image_path}", slide.placeholders[2].left, slide.placeholders[2].top)
+                self.layoutM._create_picture_with_caption_slide(presentation, title, 
+                    os.path.join(self.config["IMAGES_PATH"], image_path),
+                    image_query)
+            elif slide_type == "[L_THS]":  # Thanks Slide
+                self.layoutM._create_title_only_slide(presentation, title)
 
+    
     def _extract_tag_content(self, text, start_tag, end_tag):
         """
         Extract the content between the start and end tags in the given text.
