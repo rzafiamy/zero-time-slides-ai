@@ -4,3 +4,4 @@ icrawler
 python-pptx
 python-dotenv
 argparse
+duckduckgo-search

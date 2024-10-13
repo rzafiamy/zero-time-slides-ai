@@ -2,6 +2,7 @@ from pptx import Presentation
 from core.image_search import ImageSearcher
 from core.ai_requester import AIRequester
 from core.layout_manager import LayoutManager
+from core.web_search import WebSearch
 import os
 
 class SlidesGenerator:
@@ -17,7 +18,8 @@ class SlidesGenerator:
         """
         Generate a PowerPoint presentation based on the AI content response.
         """
-        prompt = self.ai_requester.create_prompt(topic, slide_length)
+        context = WebSearch(self.config, topic).perform_search_and_format(self.ai_requester)
+        prompt = self.ai_requester.create_prompt(topic, slide_length, context)
         content = self.ai_requester.request_ai(prompt)
         
         presentation = Presentation("templates/template0.pptx")

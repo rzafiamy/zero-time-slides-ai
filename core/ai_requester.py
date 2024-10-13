@@ -23,7 +23,7 @@ class AIRequester:
             with open(self.cache_file, 'w') as f:
                 json.dump({}, f)
 
-    def create_prompt(self, topic, slide_length):
+    def create_prompt(self, topic, slide_length, context=''):
         """
         Create a prompt for the AI model based on the topic and slide length.
         """
@@ -71,7 +71,11 @@ class AIRequester:
         Elaborate on the Content, provide as much information as possible.
         REMEMBER TO PLACE a [/CONTENT] at the end of the Content.
         Do not include any special characters (?, !, ., :, ) in the Title.
-        Do not include any additional information in your response and stick to the format."""
+        Do not include any additional information in your response and stick to the format.
+        
+        Context:
+        {context}
+        """
 
     def request_ai(self, message):
         """

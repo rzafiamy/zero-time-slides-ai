@@ -64,9 +64,16 @@ class ImageSearcher:
         image_files = [f for f in os.listdir(self.images_path) if f.startswith('p_')]
         image_file = image_files[0] if image_files else None
 
+        # rename file by removing the prefix 'p_'
+        if image_file:
+            os.rename(os.path.join(self.images_path, image_file), os.path.join(self.images_path, image_file[2:]))
+            image_file = image_file[2:]
+        
         # Cache the result before returning it and save to JSON file
         if image_file:
             self.cache[query] = image_file
             self.save_cache()
 
+        image_file = 'default.png' if not image_file else image_file
+        
         return image_file
