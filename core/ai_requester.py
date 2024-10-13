@@ -33,11 +33,13 @@ class AIRequester:
         You are allowed to use the following slide types:
         Title Slide - (Title, Subtitle)
         Content Slide - (Title, Content)
+        Two Content Slide - (Title, Content Left, Content Right)
         Image Slide - (Title, Content, Image)
         Thanks Slide - (Title)
 
         Put this tag before the Title Slide: [L_TS]
         Put this tag before the Content Slide: [L_CS]
+        Put this tag before the Two Content Slide: [L_TCS]
         Put this tag before the Image Slide: [L_IS]
         Put this tag before the Thanks Slide: [L_THS]
         
@@ -68,6 +70,20 @@ class AIRequester:
 
         [SLIDEBREAK]
 
+        [L_TCS]
+        [TITLE]Gameplay[/TITLE]
+        [CONTENT]
+        - Crewmates must work together to complete tasks around the map while Impostors attempt to eliminate
+        - Impostors can use vents to move around the map quickly and sabotage the Crewmates' efforts
+        [/CONTENT]
+        [CONTENT]
+        - Meetings are called when a player reports a dead body or calls an emergency meeting
+        - Players discuss and vote on who they believe is the Impostor
+        [/CONTENT]
+
+
+        [SLIDEBREAK]
+
         Elaborate on the Content, provide as much information as possible.
         REMEMBER TO PLACE a [/CONTENT] at the end of the Content.
         Do not include any special characters (?, !, ., :, ) in the Title.
@@ -77,6 +93,27 @@ class AIRequester:
         {context}
         """
 
+    def create_slide_prompt(self, slide_type, title, content):
+        """
+        Create a prompt for the AI model to generate a slide based on the slide type, title, and content.
+        """
+        return f"""Create a short slide text for a {slide_type} slide with the following details:
+
+        {title}
+        {content}
+
+        Example:
+        The world of AI is vast and ever-evolving. From self-driving cars to virtual assistants, AI has transformed the way we live and work. In this slide, we will explore the impact of AI on various industries and its potential for the future.
+        All developer teams should be using the same AI model to generate the content for the slides.
+        It is a good idea to have a consistent style and tone throughout the presentation.
+
+
+
+        Do not include any special markdown characters (*, #) in the content.
+        Do not include any additional information in your response and stick to the format.
+        Do not use introductory phrases like "Here is the revised," "Here is the updated," etc.
+        """
+        
     def request_ai(self, message):
         """
         Get the response from the chosen AI model.

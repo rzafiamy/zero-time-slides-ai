@@ -24,16 +24,6 @@ class LayoutManager:
         slide.shapes.title.text = title
         slide.placeholders[1].text = content
 
-    def _create_section_header_slide(self, presentation, title, body):
-        """
-        Create a section header slide with the given title and body text.
-        """
-        print(f"Creating section header slide with title: {title}")
-        slide_layout = presentation.slide_layouts[2]
-        slide = presentation.slides.add_slide(slide_layout)
-        slide.shapes.title.text = title
-        slide.placeholders[1].text = body
-
     def _create_two_content_slide(self, presentation, title, content_left, content_right):
         """
         Create a two-content slide with the given title and content.

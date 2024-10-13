@@ -3,7 +3,7 @@ import json
 import random
 import string
 from icrawler import ImageDownloader
-from icrawler.builtin import GoogleImageCrawler
+from icrawler.builtin import GoogleImageCrawler, BingImageCrawler
 from urllib.parse import urlparse
 import base64
 
@@ -57,7 +57,12 @@ class ImageSearcher:
             return self.cache[query]
 
         # If not cached, download the image
-        google_crawler = GoogleImageCrawler(downloader_cls=PrefixDownloader,storage={'root_dir': self.images_path})
+        google_crawler = BingImageCrawler(
+            downloader_cls=PrefixDownloader,
+            feeder_threads=1,
+            parser_threads=2,
+            downloader_threads=4,
+            storage={'root_dir': self.images_path})
         google_crawler.crawl(keyword=query, max_num=1)
 
         # Find the downloaded image file
